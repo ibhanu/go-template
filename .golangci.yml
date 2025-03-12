@@ -1,15 +1,12 @@
 run:
   timeout: 5m
   tests: true
-  skip-dirs:
-    - prisma/db
-    - tmp
 
 linters:
   enable:
     - gofmt
     - govet
-    - golint
+    - revive
     - gocyclo
     - ineffassign
     - misspell
@@ -22,14 +19,13 @@ linters:
     - gosimple
     - staticcheck
     - stylecheck
+    - shadow
 
 linters-settings:
   gocyclo:
     min-complexity: 15
-  golint:
+  revive:
     min-confidence: 0.8
-  govet:
-    check-shadowing: true
   gocritic:
     enabled-tags:
       - diagnostic
@@ -40,6 +36,9 @@ linters-settings:
       - G404  # Use of weak random number generator
 
 issues:
+  exclude-dirs:
+    - prisma/db
+    - tmp
   exclude-rules:
     - path: _test\.go
       linters:
@@ -50,7 +49,7 @@ issues:
 
     - path: mock_.*\.go
       linters:
-        - golint
+        - revive
         - errcheck
         - dupl
 
@@ -61,6 +60,7 @@ issues:
   max-same-issues: 3
 
 output:
-  format: colored-line-number
+  formats:
+    - colored-line-number
   print-issued-lines: true
   print-linter-name: true
