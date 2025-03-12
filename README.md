@@ -18,7 +18,7 @@ A production-ready template for creating Go services following clean architectur
 - [x] Docker with Docker Compose
 - [x] Make commands for development
 - [x] Comprehensive test examples
-- [x] Swagger documentation (coming soon)
+- [x] Swagger documentation
 - [x] Rate Limiting (coming soon)
 
 ## Quick Start 🚀
@@ -84,19 +84,35 @@ make deploy          # Deploy with docker-compose
 
 ## API Documentation 📚
 
-### Public Routes
-```http
-POST /api/public/users/register
-POST /api/public/users/login
+Our API documentation is available in both Swagger/OpenAPI and traditional format.
+
+### Swagger Documentation
+
+You can access the Swagger UI at:
+```
+http://localhost:8080/swagger/
 ```
 
-### Protected Routes
-```http
-GET    /api/private/users/:id     # Requires JWT
-PUT    /api/private/users/:id     # Requires JWT
-DELETE /api/private/users/:id     # Requires JWT
-GET    /api/private/users/admin/  # Requires Admin Role
+To view the raw OpenAPI specification:
 ```
+http://localhost:8080/swagger/doc.json
+```
+
+### API Routes Overview
+
+#### Public Routes
+- `POST /api/public/users/register` - Register a new user
+- `POST /api/public/users/login` - Login and get JWT token
+
+#### Protected Routes (Requires JWT)
+- `GET /api/private/users/:id` - Get user details
+- `PUT /api/private/users/:id` - Update user
+- `DELETE /api/private/users/:id` - Delete user
+
+#### Admin Routes (Requires Admin Role)
+- `GET /api/private/users/admin` - List all users
+
+For detailed request/response schemas and examples, please refer to the Swagger documentation.
 
 ## Environment Variables 🔧
 

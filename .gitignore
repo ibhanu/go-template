@@ -8,6 +8,8 @@
 *.so
 *.dylib
 web-server
+debug
+__debug_bin*
 
 # Test binary, built with `go test -c`
 *.test
@@ -15,6 +17,8 @@ web-server
 # Output of the go coverage tool
 *.out
 coverage.html
+coverage.xml
+coverage/
 
 # IDE specific files
 .idea
@@ -27,13 +31,18 @@ coverage.html
 *.env
 !.env.example
 
-# Dependency directories
+# Go specific
 vendor/
+go.work
+go.work.sum
+.go/
 
 # Prisma generated files
-/prisma/db
+/prisma/db/**
+!/prisma/db/.gitkeep
 /prisma/*.db
-/prisma/migrations
+/prisma/migrations/**
+!/prisma/migrations/.gitkeep
 
 # Air hot reload temporary files
 tmp/
