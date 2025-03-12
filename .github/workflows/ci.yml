@@ -51,7 +51,20 @@ jobs:
         run: |
           go mod download
           go install github.com/steebchen/prisma-client-go@latest
+          go install mvdan.cc/gofumpt@latest
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
+
+      - name: Format Go files
+        run: |
+          echo "Formatting Go files..."
+          find . -name "*.go" -not -path "./prisma/*" -exec gofumpt -l -w {} \;
+          
+          # Check if there are any changes after formatting
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Error: Files were not properly formatted. Please run 'gofumpt -l -w .' locally"
+            git diff
+            exit 1
+          fi
 
       - name: Generate Prisma client
         run: make prisma-generate
@@ -119,31 +132,88 @@ jobs:
         if: github.ref == 'refs/heads/main'
         id: next_version
         run: |
-          # Fetch tags without recursion
-          git fetch --tags --depth=1
+          set -euo pipefail
+
+          # Function to validate version components
+          validate_version() {
+            local ver=$1
+            if ! [[ "$ver" =~ ^[0-9]+$ ]]; then
+              echo "Error: Invalid version component: $ver" >&2
+              return 1
+            fi
+            if [ "$ver" -lt 0 ]; then
+              echo "Error: Version component cannot be negative: $ver" >&2
+              return 1
+            fi
+            return 0
+          }
+
+          # Fetch tags efficiently (limit depth and don't fetch commits)
+          echo "Fetching tags..."
+          git fetch --tags --depth=1 2>/dev/null || {
+            echo "Warning: Failed to fetch tags, defaulting to v0.0.0"
+            LATEST_TAG="v0.0.0"
+          }
           
-          # Get latest tag or default to v0.0.0
-          LATEST_TAG=$(git tag -l "v*" --sort=-v:refname | head -n 1 2>/dev/null || echo "v0.0.0")
-          echo "Latest tag: $LATEST_TAG"
+          # Get latest tag with better error handling
+          if ! LATEST_TAG=$(git tag -l "v*" --sort=-v:refname | head -n 1 2>/dev/null); then
+            echo "No existing tags found, defaulting to v0.0.0"
+            LATEST_TAG="v0.0.0"
+          fi
           
-          # Extract version components with validation
+          echo "Latest tag found: $LATEST_TAG"
+          
+          # Extract and validate version components
           if [[ $LATEST_TAG =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-            MAJOR=${BASH_REMATCH[1]}
-            MINOR=${BASH_REMATCH[2]}
-            PATCH=${BASH_REMATCH[3]}
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+            
+            # Validate each component
+            validate_version "$MAJOR" && \
+            validate_version "$MINOR" && \
+            validate_version "$PATCH" || {
+              echo "Warning: Invalid version components, resetting to v0.0.0"
+              MAJOR=0
+              MINOR=0
+              PATCH=0
+            }
           else
-            # If tag doesn't match expected format, start from v0.0.0
+            echo "Warning: Tag format invalid, defaulting to v0.0.0"
             MAJOR=0
             MINOR=0
             PATCH=0
           fi
           
-          # Increment patch version
-          PATCH=$((PATCH + 1))
+          # Increment patch version with overflow protection
+          if [ "$PATCH" -eq 999999 ]; then
+            echo "Warning: Patch version at maximum, incrementing minor version"
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else
+            PATCH=$((PATCH + 1))
+          fi
+          
+          # Construct and validate next version
           NEXT_VERSION="v$MAJOR.$MINOR.$PATCH"
           echo "Next version: $NEXT_VERSION"
-          echo "NEXT_VERSION=$NEXT_VERSION" >> $GITHUB_ENV
-          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          
+          # Verify version format
+          if ! [[ $NEXT_VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Generated version is invalid: $NEXT_VERSION" >&2
+            exit 1
+          fi
+          
+          # Set outputs with validation
+          {
+            echo "NEXT_VERSION=$NEXT_VERSION" >> $GITHUB_ENV
+            echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          } || {
+            echo "Error: Failed to set version outputs" >&2
+            exit 1
+          }
+          
+          echo "Successfully generated next version: $NEXT_VERSION"
       
       - name: Create and push new tag
         if: github.ref == 'refs/heads/main'
