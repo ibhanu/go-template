@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -77,17 +76,17 @@ func RefreshToken(refreshTokenString string) (*TokenPair, error) {
 	// Parse and validate refresh token
 	token, err := jwt.ParseWithClaims(refreshTokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
+			return nil, constants.ErrUnexpectedSigningMethod
 		}
 		return cfg.JWTRefreshSecret, nil
 	})
 
 	if err != nil || !token.Valid {
-		return nil, errors.New("invalid refresh token")
+		return nil, constants.ErrInvalidRefreshToken
 	}
 
 	if claims.TokenType != "refresh" {
-		return nil, errors.New("invalid token type")
+		return nil, constants.ErrInvalidTokenType
 	}
 
 	// Generate new token pair
@@ -98,14 +97,14 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, constants.ErrAuthHeaderRequired)
+			c.JSON(http.StatusUnauthorized, constants.ErrAuthHeaderRequired())
 			c.Abort()
 			return
 		}
 
 		bearerToken := strings.Split(authHeader, " ")
 		if len(bearerToken) != 2 || bearerToken[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized, constants.ErrInvalidAuthFormat)
+			c.JSON(http.StatusUnauthorized, constants.ErrInvalidAuthFormat())
 			c.Abort()
 			return
 		}
@@ -115,19 +114,19 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.New("unexpected signing method")
+				return nil, constants.ErrUnexpectedSigningMethod
 			}
 			return config.GetConfig().JWTSecret, nil
 		})
 
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, constants.ErrInvalidToken)
+			c.JSON(http.StatusUnauthorized, constants.ErrInvalidToken())
 			c.Abort()
 			return
 		}
 
 		if !token.Valid || claims.TokenType != "access" {
-			c.JSON(http.StatusUnauthorized, constants.ErrInvalidToken)
+			c.JSON(http.StatusUnauthorized, constants.ErrInvalidToken())
 			c.Abort()
 			return
 		}
@@ -143,12 +142,18 @@ func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get("role")
 		if !exists {
-			c.JSON(http.StatusUnauthorized, constants.ErrRoleNotFound)
+			c.JSON(http.StatusUnauthorized, constants.ErrRoleNotFound())
 			c.Abort()
 			return
 		}
 
-		roleStr := role.(string)
+		roleStr, ok := role.(string)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, constants.ErrInternalServer())
+			c.Abort()
+			return
+		}
+
 		allowed := false
 		for _, r := range allowedRoles {
 			if r == roleStr {
@@ -158,7 +163,7 @@ func RoleMiddleware(allowedRoles ...string) gin.HandlerFunc {
 		}
 
 		if !allowed {
-			c.JSON(http.StatusForbidden, constants.ErrInsufficientPermissions)
+			c.JSON(http.StatusForbidden, constants.ErrInsufficientPermissions())
 			c.Abort()
 			return
 		}

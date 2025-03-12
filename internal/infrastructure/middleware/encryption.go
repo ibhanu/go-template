@@ -10,10 +10,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gin-gonic/gin"
+
 	"web-server/internal/domain/constants"
 	"web-server/internal/infrastructure/config"
-
-	"github.com/gin-gonic/gin"
 )
 
 type encryptedBody struct {
@@ -33,7 +33,7 @@ func EncryptionMiddleware() gin.HandlerFunc {
 		// Read the request body
 		body, err := io.ReadAll(c.Request.Body)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, constants.ErrRequestBodyRead)
+			c.JSON(http.StatusBadRequest, constants.ErrRequestBodyRead())
 			c.Abort()
 			return
 		}
@@ -44,14 +44,14 @@ func EncryptionMiddleware() gin.HandlerFunc {
 			// Create cipher
 			block, err := aes.NewCipher(cfg.EncryptionKey)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, constants.ErrEncryption)
+				c.JSON(http.StatusInternalServerError, constants.ErrEncryption())
 				c.Abort()
 				return
 			}
 
 			aesgcm, err := cipher.NewGCM(block)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, constants.ErrEncryption)
+				c.JSON(http.StatusInternalServerError, constants.ErrEncryption())
 				c.Abort()
 				return
 			}
@@ -64,7 +64,7 @@ func EncryptionMiddleware() gin.HandlerFunc {
 			encBody := encryptedBody{Data: encodedData}
 			newBody, err := json.Marshal(encBody)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, constants.ErrEncryption)
+				c.JSON(http.StatusInternalServerError, constants.ErrEncryption())
 				c.Abort()
 				return
 			}

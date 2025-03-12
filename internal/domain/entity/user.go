@@ -8,7 +8,7 @@ type User struct {
 	Role     string `json:"role" binding:"required,oneof=user admin"`
 }
 
-// NewUser creates a new user with default role
+// NewUser creates a new user with default role.
 func NewUser(username, email, password string) *User {
 	return &User{
 		ID:       "", // Will be set by repository

@@ -1,55 +1,95 @@
 package constants
 
-// HTTP Error Messages
+import "errors"
+
+// HTTP Error Messages.
 type ErrorResponse struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 }
 
+// JWT errors.
 var (
-	// Authentication Errors
-	ErrAuthHeaderRequired = ErrorResponse{
+	ErrUnexpectedSigningMethod = errors.New("unexpected JWT signing method")
+	ErrInvalidRefreshToken     = errors.New("invalid refresh token")
+	ErrInvalidTokenType        = errors.New("invalid token type")
+)
+
+// Repository errors.
+var (
+	ErrUserNotFound      = errors.New("user not found")
+	ErrUserAlreadyExists = errors.New("user already exists")
+)
+
+// Authentication Errors.
+func ErrAuthHeaderRequired() ErrorResponse {
+	return ErrorResponse{
 		Code:    "AUTH_HEADER_REQUIRED",
 		Message: "Authorization header is required",
 	}
-	ErrInvalidAuthFormat = ErrorResponse{
+}
+
+func ErrInvalidAuthFormat() ErrorResponse {
+	return ErrorResponse{
 		Code:    "INVALID_AUTH_FORMAT",
 		Message: "Invalid authorization header format",
 	}
-	ErrInvalidToken = ErrorResponse{
+}
+
+func ErrInvalidToken() ErrorResponse {
+	return ErrorResponse{
 		Code:    "INVALID_TOKEN",
 		Message: "Invalid token",
 	}
-	ErrRoleNotFound = ErrorResponse{
+}
+
+func ErrRoleNotFound() ErrorResponse {
+	return ErrorResponse{
 		Code:    "ROLE_NOT_FOUND",
 		Message: "Role not found in context",
 	}
-	ErrInsufficientPermissions = ErrorResponse{
+}
+
+func ErrInsufficientPermissions() ErrorResponse {
+	return ErrorResponse{
 		Code:    "INSUFFICIENT_PERMISSIONS",
 		Message: "Insufficient permissions",
 	}
+}
 
-	// Encryption Errors
-	ErrRequestBodyRead = ErrorResponse{
+// Encryption Errors.
+func ErrRequestBodyRead() ErrorResponse {
+	return ErrorResponse{
 		Code:    "REQUEST_BODY_READ_ERROR",
 		Message: "Failed to read request body",
 	}
-	ErrEncryption = ErrorResponse{
+}
+
+func ErrEncryption() ErrorResponse {
+	return ErrorResponse{
 		Code:    "ENCRYPTION_ERROR",
 		Message: "Encryption error occurred",
 	}
-	ErrDecryption = ErrorResponse{
+}
+
+func ErrDecryption() ErrorResponse {
+	return ErrorResponse{
 		Code:    "DECRYPTION_ERROR",
 		Message: "Decryption error occurred",
 	}
+}
 
-	// Generic Errors
-	ErrInternalServer = ErrorResponse{
+// Generic Errors.
+func ErrInternalServer() ErrorResponse {
+	return ErrorResponse{
 		Code:    "INTERNAL_SERVER_ERROR",
 		Message: "Internal server error occurred",
 	}
-	ErrInvalidRequest = ErrorResponse{
+}
+
+func ErrInvalidRequest() ErrorResponse {
+	return ErrorResponse{
 		Code:    "INVALID_REQUEST",
 		Message: "Invalid request",
 	}
-)
+}

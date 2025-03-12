@@ -16,7 +16,7 @@ type RateLimiter struct {
 	mutex         sync.Mutex // mutex for thread safety
 }
 
-func NewRateLimiter(capacity float64, refillRate float64) *RateLimiter {
+func NewRateLimiter(capacity, refillRate float64) *RateLimiter {
 	return &RateLimiter{
 		tokens:        capacity,
 		capacity:      capacity,
@@ -29,7 +29,7 @@ func (rl *RateLimiter) refill() {
 	now := time.Now()
 	duration := now.Sub(rl.lastTimestamp).Seconds()
 	newTokens := duration * rl.refillRate
-	rl.tokens = min(rl.capacity, rl.tokens+newTokens)
+	rl.tokens = minFloat64(rl.capacity, rl.tokens+newTokens)
 	rl.lastTimestamp = now
 }
 
@@ -45,8 +45,8 @@ func (rl *RateLimiter) tryConsume(tokens float64) bool {
 	return false
 }
 
-// min returns the smaller of two float64 numbers
-func min(a, b float64) float64 {
+// minFloat64 returns the smaller of two float64 numbers.
+func minFloat64(a, b float64) float64 {
 	if a < b {
 		return a
 	}
@@ -55,7 +55,7 @@ func min(a, b float64) float64 {
 
 // RateLimiterMiddleware creates a middleware that limits requests using the token bucket algorithm
 // capacity: maximum number of tokens (requests)
-// refillRate: number of tokens (requests) to refill per second
+// refillRate: number of tokens (requests) to refill per second.
 func RateLimiterMiddleware(capacity, refillRate float64) gin.HandlerFunc {
 	limiter := NewRateLimiter(capacity, refillRate)
 

@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// responseWriter is a custom response writer that captures the response status and body
+// responseWriter is a custom response writer that captures the response status and body.
 type responseWriter struct {
 	gin.ResponseWriter
 	body *bytes.Buffer
@@ -20,7 +20,7 @@ func (w responseWriter) Write(b []byte) (int, error) {
 	return w.ResponseWriter.Write(b)
 }
 
-// LoggerMiddleware creates a middleware for logging requests and responses
+// LoggerMiddleware creates a middleware for logging requests and responses.
 func LoggerMiddleware(log *logrus.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Start timer
@@ -29,8 +29,13 @@ func LoggerMiddleware(log *logrus.Logger) gin.HandlerFunc {
 		// Create a copy of the request body
 		var reqBody []byte
 		if c.Request.Body != nil {
-			reqBody, _ = io.ReadAll(c.Request.Body)
-			c.Request.Body = io.NopCloser(bytes.NewBuffer(reqBody))
+			var err error
+			reqBody, err = io.ReadAll(c.Request.Body)
+			if err != nil {
+				log.WithError(err).Warn("Failed to read request body for logging")
+			} else {
+				c.Request.Body = io.NopCloser(bytes.NewBuffer(reqBody))
+			}
 		}
 
 		// Create custom response writer
@@ -79,7 +84,7 @@ func LoggerMiddleware(log *logrus.Logger) gin.HandlerFunc {
 	}
 }
 
-// InitLogger initializes and configures the logger
+// InitLogger initializes and configures the logger.
 func InitLogger() *logrus.Logger {
 	logger := logrus.New()
 

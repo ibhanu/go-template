@@ -1,8 +1,9 @@
 package repository
 
 import (
-	"errors"
 	"sync"
+
+	"web-server/internal/domain/constants"
 	"web-server/internal/domain/entity"
 )
 
@@ -22,7 +23,7 @@ func (r *InMemoryUserRepository) Create(user *entity.User) error {
 	defer r.mutex.Unlock()
 
 	if _, exists := r.users[user.ID]; exists {
-		return errors.New("user already exists")
+		return constants.ErrUserAlreadyExists
 	}
 
 	r.users[user.ID] = user
@@ -35,7 +36,7 @@ func (r *InMemoryUserRepository) GetByID(id string) (*entity.User, error) {
 
 	user, exists := r.users[id]
 	if !exists {
-		return nil, errors.New("user not found")
+		return nil, constants.ErrUserNotFound
 	}
 
 	return user, nil
@@ -46,7 +47,7 @@ func (r *InMemoryUserRepository) Update(user *entity.User) error {
 	defer r.mutex.Unlock()
 
 	if _, exists := r.users[user.ID]; !exists {
-		return errors.New("user not found")
+		return constants.ErrUserNotFound
 	}
 
 	r.users[user.ID] = user
@@ -58,7 +59,7 @@ func (r *InMemoryUserRepository) Delete(id string) error {
 	defer r.mutex.Unlock()
 
 	if _, exists := r.users[id]; !exists {
-		return errors.New("user not found")
+		return constants.ErrUserNotFound
 	}
 
 	delete(r.users, id)
@@ -87,5 +88,5 @@ func (r *InMemoryUserRepository) GetByEmail(email string) (*entity.User, error) 
 		}
 	}
 
-	return nil, errors.New("user not found")
+	return nil, constants.ErrUserNotFound
 }

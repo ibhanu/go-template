@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -123,14 +124,15 @@ func (s *Server) Start(addr string) error {
 
 	// Create http.Server instance
 	srv := &http.Server{
-		Addr:    addr,
-		Handler: s.router,
+		Addr:              addr,
+		Handler:           s.router,
+		ReadHeaderTimeout: 20 * time.Second, // Protect against slow header attacks
 	}
 
 	// Start the server in a goroutine
 	go func() {
 		s.logger.Info("Server is ready to handle requests")
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			serverErrors <- err
 		}
 	}()

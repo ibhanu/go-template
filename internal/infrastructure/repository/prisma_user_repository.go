@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+
 	"web-server/internal/domain/entity"
 	"web-server/prisma/db"
 )
@@ -94,13 +95,13 @@ func (r *PrismaUserRepository) List() ([]*entity.User, error) {
 	}
 
 	users := make([]*entity.User, len(prismaUsers))
-	for i, u := range prismaUsers {
+	for i := range prismaUsers {
 		users[i] = &entity.User{
-			ID:       u.ID,
-			Username: u.Username,
-			Email:    u.Email,
-			Password: u.Password,
-			Role:     u.Role,
+			ID:       prismaUsers[i].ID,
+			Username: prismaUsers[i].Username,
+			Email:    prismaUsers[i].Email,
+			Password: prismaUsers[i].Password,
+			Role:     prismaUsers[i].Role,
 		}
 	}
 

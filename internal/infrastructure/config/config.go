@@ -3,9 +3,18 @@ package config
 import (
 	"crypto/rand"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/joho/godotenv"
+)
+
+const (
+	jwtKeySize           = 32 // Size for JWT secret keys (256 bits)
+	encryptionKeySize    = 32 // Size for AES-256 encryption key
+	encryptionNonceSize  = 12 // Size for AES-GCM nonce
+	accessTokenDuration  = 15 * time.Minute
+	refreshTokenDuration = 7 * 24 * time.Hour
 )
 
 type Config struct {
@@ -17,8 +26,6 @@ type Config struct {
 	EncryptionNonce      []byte
 }
 
-var instance *Config
-
 func generateRandomBytes(n int) ([]byte, error) {
 	bytes := make([]byte, n)
 	_, err := rand.Read(bytes)
@@ -28,64 +35,59 @@ func generateRandomBytes(n int) ([]byte, error) {
 	return bytes, nil
 }
 
-func LoadConfig() (*Config, error) {
-	if instance != nil {
-		return instance, nil
-	}
+// singleton instance
+var (
+	configInstance *Config
+	configOnce     sync.Once
+)
 
-	if err := godotenv.Load(); err != nil {
-		// If .env file doesn't exist, we'll use generated secrets
-		// This is fine for development but in production you should use real secrets
-		jwtSecret, err := generateRandomBytes(32)
-		if err != nil {
-			return nil, err
-		}
-
-		encKey, err := generateRandomBytes(32) // AES-256 key
-		if err != nil {
-			return nil, err
-		}
-
-		nonce, err := generateRandomBytes(12) // For AES-GCM
-		if err != nil {
-			return nil, err
-		}
-
-		refreshSecret, err := generateRandomBytes(32)
-		if err != nil {
-			return nil, err
-		}
-
-		instance = &Config{
-			JWTSecret:            jwtSecret,
-			JWTExpiration:        15 * time.Minute, // Access token expires in 15 minutes
-			JWTRefreshSecret:     refreshSecret,
-			JWTRefreshExpiration: 7 * 24 * time.Hour, // Refresh token expires in 7 days
-			EncryptionKey:        encKey,
-			EncryptionNonce:      nonce,
-		}
-	} else {
-		// If .env file exists, use values from it
-		instance = &Config{
-			JWTSecret:            []byte(os.Getenv("JWT_SECRET")),
-			JWTExpiration:        15 * time.Minute, // Access token expires in 15 minutes
-			JWTRefreshSecret:     []byte(os.Getenv("JWT_REFRESH_SECRET")),
-			JWTRefreshExpiration: 7 * 24 * time.Hour, // Refresh token expires in 7 days
-			EncryptionKey:        []byte(os.Getenv("ENCRYPTION_KEY")),
-			EncryptionNonce:      []byte(os.Getenv("ENCRYPTION_NONCE")),
-		}
-	}
-
-	return instance, nil
+// GetConfig returns the singleton config instance.
+func GetConfig() *Config {
+	configOnce.Do(initConfig)
+	return configInstance
 }
 
-func GetConfig() *Config {
-	if instance == nil {
-		var err error
-		instance, err = LoadConfig()
+func initConfig() {
+	if godotenv.Load() != nil {
+		// If .env file doesn't exist, use generated secrets
+		jwtSecret, err := generateRandomBytes(jwtKeySize)
 		if err != nil {
 			panic(err)
 		}
+
+		encKey, err := generateRandomBytes(encryptionKeySize)
+		if err != nil {
+			panic(err)
+		}
+
+		nonce, err := generateRandomBytes(encryptionNonceSize)
+		if err != nil {
+			panic(err)
+		}
+
+		refreshSecret, err := generateRandomBytes(jwtKeySize)
+		if err != nil {
+			panic(err)
+		}
+
+		configInstance = &Config{
+			JWTSecret:            jwtSecret,
+			JWTExpiration:        accessTokenDuration,
+			JWTRefreshSecret:     refreshSecret,
+			JWTRefreshExpiration: refreshTokenDuration,
+			EncryptionKey:        encKey,
+			EncryptionNonce:      nonce,
+		}
+		return
 	}
-	return instance
+
+	// If .env file exists, use values from it
+	configInstance = &Config{
+		JWTSecret:            []byte(os.Getenv("JWT_SECRET")),
+		JWTExpiration:        accessTokenDuration,
+		JWTRefreshSecret:     []byte(os.Getenv("JWT_REFRESH_SECRET")),
+		JWTRefreshExpiration: refreshTokenDuration,
+		EncryptionKey:        []byte(os.Getenv("ENCRYPTION_KEY")),
+		EncryptionNonce:      []byte(os.Getenv("ENCRYPTION_NONCE")),
+	}
 }
