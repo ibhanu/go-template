@@ -103,20 +103,21 @@ jobs:
         if: github.ref == 'refs/heads/main'
         id: next_version
         run: |
-          # Check if any tags exist
-          if git rev-list --tags --max-count=1 >/dev/null 2>&1; then
-            # Get latest tag if it exists
-            LATEST_TAG=$(git describe --tags --abbrev=0)
-          else
-            # No tags exist, start with v0.0.0
-            LATEST_TAG="v0.0.0"
-          fi
+          # Try to get the latest tag, default to v0.0.0 if none exists
+          LATEST_TAG=$(git tag --sort=-v:refname | head -n 1 2>/dev/null || echo "v0.0.0")
           echo "Latest tag: $LATEST_TAG"
           
-          # Extract version components
-          MAJOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\.([0-9]+)\.([0-9]+)/\1/')
-          MINOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\.([0-9]+)\.([0-9]+)/\2/')
-          PATCH=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\.([0-9]+)\.([0-9]+)/\3/')
+          # Extract version components with validation
+          if [[ $LATEST_TAG =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            MAJOR=${BASH_REMATCH[1]}
+            MINOR=${BASH_REMATCH[2]}
+            PATCH=${BASH_REMATCH[3]}
+          else
+            # If tag doesn't match expected format, start from v0.0.0
+            MAJOR=0
+            MINOR=0
+            PATCH=0
+          fi
           
           # Increment patch version
           PATCH=$((PATCH + 1))
