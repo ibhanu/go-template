@@ -88,14 +88,6 @@ jobs:
          fail_ci_if_error: true
          verbose: true
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
-          flags: unittests
-          fail_ci_if_error: false
-
       - name: Lint code
         run: golangci-lint run ./...
 
