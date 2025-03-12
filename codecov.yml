@@ -3,7 +3,7 @@ coverage:
     project:
       default:
         # basic
-        target: 80%
+        target: 100%
         threshold: 0%
         base: auto
         # advanced
@@ -17,7 +17,7 @@ coverage:
           - internal
     patch:
       default:
-        target: 80%
+        target: 100%
   
   parsers:
     go:

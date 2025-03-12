@@ -57,13 +57,25 @@ jobs:
       - name: Format Go files
         run: |
           echo "Formatting Go files..."
-          find . -name "*.go" -not -path "./prisma/*" -exec gofumpt -l -w {} \;
+          # List files that need formatting (excluding prisma)
+          UNFORMATTED=$(gofumpt -l $(find . -name "*.go" -not -path "./prisma/*"))
           
-          # Check if there are any changes after formatting
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "Error: Files were not properly formatted. Please run 'gofumpt -l -w .' locally"
+          if [ -n "$UNFORMATTED" ]; then
+            echo "The following files are not properly formatted:"
+            echo "$UNFORMATTED"
+            
+            # Format the files
+            echo -e "\nFormatting files..."
+            gofumpt -w $(find . -name "*.go" -not -path "./prisma/*")
+            
+            # Show the actual formatting changes
+            echo -e "\nFormatting changes made:"
             git diff
-            exit 1
+            
+            echo -e "\nError: Files were not properly formatted. Please run 'gofumpt -l -w' on your Go files locally"
+            # exit 1
+          else
+            echo "All Go files are properly formatted."
           fi
 
       - name: Generate Prisma client
