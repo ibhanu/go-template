@@ -56,10 +56,24 @@ jobs:
       - name: Generate Prisma client
         run: make prisma-generate
 
-      - name: Run tests
-        run: make test-coverage
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/go_server_db
+     - name: Install go-junit-report
+       run: go install github.com/jstemmer/go-junit-report/v2@latest
+
+     - name: Run tests with coverage
+       run: |
+         make test-coverage
+       env:
+         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/go_server_db
+
+     - name: Upload coverage to Codecov
+       uses: codecov/codecov-action@v3
+       with:
+         token: ${{ secrets.CODECOV_TOKEN }}
+         files: ./coverage.out,./report.xml
+         flags: unittests
+         name: codecov-umbrella
+         fail_ci_if_error: true
+         verbose: true
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5

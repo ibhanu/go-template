@@ -3,32 +3,33 @@ coverage:
     project:
       default:
         # basic
-        target: 80%    # the required coverage value
-        threshold: 1%  # the leniency in hitting the target
-        paths:
-          - "internal"
-       # advanced
+        target: 80%
+        threshold: 0%
+        base: auto
+        # advanced
+        branches:
+          - main
         if_ci_failed: error
         only_pulls: false
+        flags:
+          - unittests
+        paths:
+          - internal
     patch:
       default:
         target: 80%
-        threshold: 1%
-
-ignore:
-  - "**/*_test.go"
-  - "**/mock_*.go"
-  - "**/mocks/**"
-  - "cmd/"
-  - "scripts/"
-  - "tests/"
+  
+  parsers:
+    go:
+      partials_as_hits: true
 
 comment:
   layout: "reach, diff, flags, files"
   behavior: default
-  require_changes: true  # if true: only post the comment if coverage changes
-  require_base: no      # [yes :: must have a base report to post]
-  require_head: yes     # [yes :: must have a head report to post]
+  require_changes: true
 
-github_checks:
-  annotations: true
+ignore:
+  - docs/*
+  - scripts/*
+  - prisma/*
+  - "*.md"

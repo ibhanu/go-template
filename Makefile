@@ -37,8 +37,9 @@ test:
 
 # Run tests with coverage
 test-coverage:
-	go test ./... -coverprofile=coverage.out
+	go test ./... -coverprofile=coverage.out -covermode=atomic
 	go tool cover -html=coverage.out -o coverage.html
+	go test ./... -coverprofile=coverage.out -covermode=atomic -coverpkg=./... | go-junit-report > report.xml
 
 # Generate mocks (requires mockgen)
 mocks:
