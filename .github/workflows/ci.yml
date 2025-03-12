@@ -70,8 +70,31 @@ jobs:
       - name: Lint code
         run: golangci-lint run ./...
 
-      - name: Build
-        run: make build
+      - name: Build for multiple platforms
+        run: |
+          # Create artifacts directory
+          mkdir -p artifacts
+
+          # Build for Linux
+          GOOS=linux GOARCH=amd64 go build -o artifacts/go-server-linux-amd64 .
+          tar -czf artifacts/go-server-linux-amd64.tar.gz -C artifacts go-server-linux-amd64
+
+          # Build for MacOS
+          GOOS=darwin GOARCH=amd64 go build -o artifacts/go-server-darwin-amd64 .
+          tar -czf artifacts/go-server-darwin-amd64.tar.gz -C artifacts go-server-darwin-amd64
+
+          # Build for Windows
+          GOOS=windows GOARCH=amd64 go build -o artifacts/go-server-windows-amd64.exe .
+          zip -j artifacts/go-server-windows-amd64.zip artifacts/go-server-windows-amd64.exe
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: binaries
+          path: |
+            artifacts/go-server-linux-amd64.tar.gz
+            artifacts/go-server-darwin-amd64.tar.gz
+            artifacts/go-server-windows-amd64.zip
 
       - name: Build Docker image
         run: make docker-build
@@ -80,8 +103,14 @@ jobs:
         if: github.ref == 'refs/heads/main'
         id: next_version
         run: |
-          # Get the latest release tag (if any)
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          # Check if any tags exist
+          if git rev-list --tags --max-count=1 >/dev/null 2>&1; then
+            # Get latest tag if it exists
+            LATEST_TAG=$(git describe --tags --abbrev=0)
+          else
+            # No tags exist, start with v0.0.0
+            LATEST_TAG="v0.0.0"
+          fi
           echo "Latest tag: $LATEST_TAG"
           
           # Extract version components
@@ -101,8 +130,23 @@ jobs:
         run: |
           git config user.name "${GITHUB_ACTOR}"
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git tag -a ${{ env.NEXT_VERSION }} -m "Auto-generated release ${{ env.NEXT_VERSION }}"
-          git push origin ${{ env.NEXT_VERSION }}
+          
+          # Check if tag already exists
+          if ! git rev-parse "${{ env.NEXT_VERSION }}" >/dev/null 2>&1; then
+            echo "Creating new tag ${{ env.NEXT_VERSION }}"
+            git tag -a ${{ env.NEXT_VERSION }} -m "Auto-generated release ${{ env.NEXT_VERSION }}"
+            
+            echo "Pushing new tag to origin"
+            if git push origin ${{ env.NEXT_VERSION }}; then
+              echo "Successfully pushed tag ${{ env.NEXT_VERSION }}"
+            else
+              echo "Failed to push tag ${{ env.NEXT_VERSION }}"
+              exit 1
+            fi
+          else
+            echo "Tag ${{ env.NEXT_VERSION }} already exists"
+            exit 1
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -110,20 +154,26 @@ jobs:
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
+        if: github.ref == 'refs/heads/main' && success() && env.NEXT_VERSION != ''
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
-          name: Release ${{ steps.get_version.outputs.VERSION }}
+          tag_name: ${{ env.NEXT_VERSION }}
+          name: Release ${{ env.NEXT_VERSION }}
           draft: false
           prerelease: false
           files: |
-            go-server-1-linux-amd64.tar.gz
+            artifacts/go-server-linux-amd64.tar.gz
+            artifacts/go-server-darwin-amd64.tar.gz
+            artifacts/go-server-windows-amd64.zip
           body: |
-            ## Release ${{ steps.get_version.outputs.VERSION }}
+            ## Release ${{ env.NEXT_VERSION }}
             
             ### Changes
             - Auto-generated release from main branch
             
             ### Assets
-            - go-server-1-linux-amd64.tar.gz: Linux amd64 binary
+            - go-server-linux-amd64.tar.gz: Linux AMD64 binary
+            - go-server-darwin-amd64.tar.gz: macOS AMD64 binary
+            - go-server-windows-amd64.zip: Windows AMD64 binary
