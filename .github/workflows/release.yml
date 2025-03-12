@@ -2,6 +2,8 @@ name: Release
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
   workflow_dispatch:
@@ -13,8 +15,66 @@ on:
 
 jobs:
   build:
+    name: Build
+    runs-on: ubuntu-latest
+    # Skip this job for tag pushes (handled by release job)
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+          cache: true
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+
+      - name: Build
+        run: |
+          go build -v -o go-server-1 ./cmd/main.go
+      
+      - name: Get latest version and increment
+        if: github.ref == 'refs/heads/main'
+        id: next_version
+        run: |
+          # Get the latest release tag (if any)
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+          
+          # Extract version components
+          MAJOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\.([0-9]+)\.([0-9]+)/\1/')
+          MINOR=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\.([0-9]+)\.([0-9]+)/\2/')
+          PATCH=$(echo $LATEST_TAG | sed -E 's/v([0-9]+)\.([0-9]+)\.([0-9]+)/\3/')
+          
+          # Increment patch version
+          PATCH=$((PATCH + 1))
+          NEXT_VERSION="v$MAJOR.$MINOR.$PATCH"
+          echo "Next version: $NEXT_VERSION"
+          echo "NEXT_VERSION=$NEXT_VERSION" >> $GITHUB_ENV
+          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Create and push new tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git tag -a ${{ env.NEXT_VERSION }} -m "Auto-generated release ${{ env.NEXT_VERSION }}"
+          git push origin ${{ env.NEXT_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release:
     name: Build and Release
     runs-on: ubuntu-latest
+    # Only run this job for tag pushes or manual workflow dispatch
+    if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -60,7 +120,7 @@ jobs:
             ## Release ${{ steps.get_version.outputs.VERSION }}
             
             ### Changes
-            - Add your changes here
+            - Auto-generated release from main branch
             
             ### Assets
             - go-server-1-linux-amd64.tar.gz: Linux amd64 binary
