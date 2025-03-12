@@ -1,8 +1,15 @@
 # Go Clean Template
 
+[![Build Status](https://github.com/ibhanu/go-template/workflows/CI/badge.svg)](https://github.com/ibhanu/go-template/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ibhanu/go-template)](https://goreportcard.com/report/github.com/ibhanu/go-template)
 [![Go Reference](https://pkg.go.dev/badge/github.com/ibhanu/go-template.svg)](https://pkg.go.dev/github.com/ibhanu/go-template)
 [![Release](https://img.shields.io/github/v/release/ibhanu/go-template.svg)](https://github.com/ibhanu/go-template/releases)
+[![codecov](https://codecov.io/gh/ibhanu/go-template/branch/main/graph/badge.svg)](https://codecov.io/gh/ibhanu/go-template)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/ibhanu/go-template)](https://go.dev/)
+[![License](https://img.shields.io/github/license/ibhanu/go-template)](LICENSE)
+[![Issues](https://img.shields.io/github/issues/ibhanu/go-template)](https://github.com/ibhanu/go-template/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/ibhanu/go-template)](https://github.com/ibhanu/go-template/pulls)
+[![Last Commit](https://img.shields.io/github/last-commit/ibhanu/go-template)](https://github.com/ibhanu/go-template/commits/main)
 
 A production-ready template for creating Go services following clean architecture principles.
 
