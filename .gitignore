@@ -1,0 +1,4 @@
+.env
+.vscode/launch.json
+tmp/main
+tmp/build-errors.log
