@@ -1,8 +1,8 @@
 # Go Clean Template
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/ibhanu/go-template)](https://goreportcard.com/report/github.com/ibhanu/go-template)
-[![Go Reference](https://pkg.go.dev/badge/github.com/yourusername/go-template.svg)](https://pkg.go.dev/github.com/yourusername/go-template)
-[![Release](https://img.shields.io/github/v/release/yourusername/go-template.svg)](https://github.com/yourusername/go-template/releases)
+[![Go Reference](https://pkg.go.dev/badge/github.com/ibhanu/go-template.svg)](https://pkg.go.dev/github.com/ibhanu/go-template)
+[![Release](https://img.shields.io/github/v/release/ibhanu/go-template.svg)](https://github.com/ibhanu/go-template/releases)
 
 A production-ready template for creating Go services following clean architecture principles.
 
@@ -19,13 +19,13 @@ A production-ready template for creating Go services following clean architectur
 - [x] Make commands for development
 - [x] Comprehensive test examples
 - [x] Swagger documentation
-- [x] Rate Limiting (coming soon)
+- [ ] Rate Limiting (coming soon)
 
 ## Quick Start 🚀
 
 ```bash
 # Get the template
-git clone https://github.com/yourusername/go-clean-template.git
+git clone https://github.com/ibhanu/go-template.git
 
 # Create your project
 mkdir -p your-project && cd your-project
