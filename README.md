@@ -26,65 +26,18 @@ This template provides all these essentials out of the box, saving you weeks of 
 
 ## Features 🚀
 
-### Architecture & Design
-- [x] **Clean Architecture** implementation with clear layer separation
-- [x] Domain-Driven Design (DDD) principles
-- [x] SOLID principles and best practices
-- [x] Dependency injection pattern
-- [x] Interface-driven design
-
-### Security
-- [x] **JWT Authentication** with role-based access control
-- [x] End-to-End request/response encryption
-- [x] Secure password hashing with bcrypt
-- [x] HTTP security headers
-- [x] Rate limiting (coming soon)
-- [x] Input validation and sanitization
-
-### Database & ORM
-- [x] **PostgreSQL** integration
-- [x] Prisma ORM with type-safe queries
-- [x] Migration management
-- [x] Connection pooling
-- [x] Transaction support
-
-### Development Experience
-- [x] **Hot Reload** development mode
-- [x] Comprehensive Makefile commands
-- [x] Docker & Docker Compose setup
-- [x] Linting and formatting tools
-- [x] Git hooks for code quality
-- [x] Debugging configurations
-
-### Testing & Quality
-- [x] **100% test coverage** requirement
-- [x] Unit test examples
-- [x] Integration test examples
-- [x] Benchmark tests
-- [x] Mocking examples
-- [x] CI/CD pipeline with GitHub Actions
-
-### Documentation
-- [x] **Swagger/OpenAPI** documentation
-- [x] Godoc comments
-- [x] Architecture decision records
-- [x] API usage examples
-- [x] Contributing guidelines
-
-### Operations
-- [x] **Graceful shutdown** handling
-- [x] Structured logging with Logrus
-- [x] Metrics and monitoring setup
-- [x] Health check endpoints
-- [x] Multi-platform builds
-- [x] Container orchestration
-
-## Prerequisites 📋
-
-- Go 1.24 or higher
-- Docker and Docker Compose
-- PostgreSQL 14 or higher
-- Make
+- [x] Clean Architecture with detailed examples
+- [x] JWT Authentication & Role-Based Access Control
+- [x] End-to-End Encryption for requests/responses
+- [x] PostgreSQL with Prisma ORM
+- [x] Graceful Shutdown
+- [x] Structured Logging with Logrus
+- [x] Hot Reload Development
+- [x] Docker with Docker Compose
+- [x] Make commands for development
+- [x] Comprehensive test examples
+- [x] Swagger documentation
+- [ ] Rate Limiting (coming soon)
 
 ## Quick Start 🚀
 
@@ -466,10 +419,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Clean Architecture by Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Gin Web Framework](https://gin-gonic.com/)
 - [Prisma](https://www.prisma.io/)
-- Open source community
-
-## Support 💬
-
-- [Report Issues](https://github.com/ibhanu/go-template/issues)
-- [Discussions](https://github.com/ibhanu/go-template/discussions)
-- [Security](SECURITY.md)
