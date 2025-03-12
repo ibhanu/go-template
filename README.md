@@ -26,7 +26,7 @@ A production-ready template for creating Go services following clean architectur
 - [x] Make commands for development
 - [x] Comprehensive test examples
 - [x] Swagger documentation
-- [ ] Rate Limiting (coming soon)
+- [x] Rate Limiting (coming soon)
 
 ## Quick Start 🚀
 
