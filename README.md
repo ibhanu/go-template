@@ -1,8 +1,8 @@
 # Go Clean Template
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/yourusername/go-clean-template)](https://goreportcard.com/report/github.com/yourusername/go-clean-template)
-[![Go Reference](https://pkg.go.dev/badge/github.com/yourusername/go-clean-template.svg)](https://pkg.go.dev/github.com/yourusername/go-clean-template)
-[![Release](https://img.shields.io/github/v/release/yourusername/go-clean-template.svg)](https://github.com/yourusername/go-clean-template/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ibhanu/go-template)](https://goreportcard.com/report/github.com/ibhanu/go-template)
+[![Go Reference](https://pkg.go.dev/badge/github.com/yourusername/go-template.svg)](https://pkg.go.dev/github.com/yourusername/go-template)
+[![Release](https://img.shields.io/github/v/release/yourusername/go-template.svg)](https://github.com/yourusername/go-template/releases)
 
 A production-ready template for creating Go services following clean architecture principles.
 
