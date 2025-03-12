@@ -1,0 +1,34 @@
+coverage:
+  status:
+    project:
+      default:
+        # basic
+        target: 80%    # the required coverage value
+        threshold: 1%  # the leniency in hitting the target
+        paths:
+          - "internal"
+       # advanced
+        if_ci_failed: error
+        only_pulls: false
+    patch:
+      default:
+        target: 80%
+        threshold: 1%
+
+ignore:
+  - "**/*_test.go"
+  - "**/mock_*.go"
+  - "**/mocks/**"
+  - "cmd/"
+  - "scripts/"
+  - "tests/"
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: true  # if true: only post the comment if coverage changes
+  require_base: no      # [yes :: must have a base report to post]
+  require_head: yes     # [yes :: must have a head report to post]
+
+github_checks:
+  annotations: true

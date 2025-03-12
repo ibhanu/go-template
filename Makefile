@@ -95,4 +95,36 @@ setup: deps
 	@echo "✓ Development environment setup complete"
 	@echo "Run 'make dev' to start the server with hot reload"
 
-.PHONY: build run dev clean deps test test-coverage mocks fmt lint setup prisma-generate prisma-db-push prisma-studio db-init
+# Docker commands
+docker-build:
+@echo "Building Docker image..."
+@docker build -t go-server .
+
+docker-run:
+@echo "Running Docker container..."
+@docker run -p 8080:8080 --env-file .env go-server
+
+docker-compose-up:
+@echo "Starting services with Docker Compose..."
+@docker-compose up -d
+
+docker-compose-down:
+@echo "Stopping services..."
+@docker-compose down
+
+docker-compose-logs:
+@docker-compose logs -f
+
+docker-clean:
+@echo "Cleaning Docker resources..."
+@docker-compose down -v
+@docker rmi go-server
+
+# Production deployment
+deploy: docker-build docker-compose-up
+@echo "✓ Application deployed successfully"
+@echo "Run 'make docker-compose-logs' to view logs"
+
+.PHONY: build run dev clean deps test test-coverage mocks fmt lint setup \
+prisma-generate prisma-db-push prisma-studio db-init \
+docker-build docker-run docker-compose-up docker-compose-down docker-compose-logs docker-clean deploy

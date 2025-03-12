@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/go_server_db?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  db:
+    image: postgres:14-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=go_server_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Uncomment to enable Prisma Studio in production
+  # prisma-studio:
+  #   build: 
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   command: make prisma-studio
+  #   ports:
+  #     - "5555:5555"
+  #   environment:
+  #     - DATABASE_URL=postgresql://postgres:postgres@db:5432/go_server_db?schema=public
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

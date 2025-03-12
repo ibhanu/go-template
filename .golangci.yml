@@ -1,0 +1,66 @@
+run:
+  timeout: 5m
+  tests: true
+  skip-dirs:
+    - prisma/db
+    - tmp
+
+linters:
+  enable:
+    - gofmt
+    - govet
+    - golint
+    - gocyclo
+    - ineffassign
+    - misspell
+    - gocritic
+    - gosec
+    - unconvert
+    - unparam
+    - whitespace
+    - errcheck
+    - gosimple
+    - staticcheck
+    - stylecheck
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  golint:
+    min-confidence: 0.8
+  govet:
+    check-shadowing: true
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - style
+      - performance
+  gosec:
+    excludes:
+      - G404  # Use of weak random number generator
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+
+    - path: mock_.*\.go
+      linters:
+        - golint
+        - errcheck
+        - dupl
+
+  # Maximum issues count per one linter
+  max-issues-per-linter: 50
+
+  # Maximum count of issues with the same text
+  max-same-issues: 3
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true

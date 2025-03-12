@@ -1,126 +1,88 @@
-# Go Clean Architecture Template
+# Go Clean Template
 
-A production-ready Go server template following clean architecture principles with JWT authentication, end-to-end encryption, and Prisma database integration.
+[![Go Report Card](https://goreportcard.com/badge/github.com/yourusername/go-clean-template)](https://goreportcard.com/report/github.com/yourusername/go-clean-template)
+[![Go Reference](https://pkg.go.dev/badge/github.com/yourusername/go-clean-template.svg)](https://pkg.go.dev/github.com/yourusername/go-clean-template)
+[![Release](https://img.shields.io/github/v/release/yourusername/go-clean-template.svg)](https://github.com/yourusername/go-clean-template/releases)
 
-## Features
+A production-ready template for creating Go services following clean architecture principles.
 
-- 🏗️ Clean Architecture
-- 🔐 JWT Authentication
-- 👮 Role-Based Access Control
-- 🔒 End-to-End Encryption
-- 📦 Prisma Database Integration
-- 🔄 Hot Reload Development
-- 📝 Structured Logging
-- 🛑 Graceful Shutdown
+## Features 🚀
 
-## Template Usage Sequence
+- [x] Clean Architecture with detailed examples
+- [x] JWT Authentication & Role-Based Access Control
+- [x] End-to-End Encryption for requests/responses
+- [x] PostgreSQL with Prisma ORM
+- [x] Graceful Shutdown
+- [x] Structured Logging with Logrus
+- [x] Hot Reload Development
+- [x] Docker with Docker Compose
+- [x] Make commands for development
+- [x] Comprehensive test examples
+- [x] Swagger documentation (coming soon)
+- [x] Rate Limiting (coming soon)
 
-### 1. Prerequisites Installation
-
-```bash
-# 1. Install Go (1.24 or higher)
-go version
-
-# 2. Install PostgreSQL
-# macOS
-brew install postgresql@14
-brew services start postgresql@14
-
-# Ubuntu/Debian
-sudo apt-get update
-sudo apt-get install postgresql postgresql-contrib
-sudo service postgresql start
-
-# Windows
-# Download from: https://www.postgresql.org/download/windows/
-```
-
-### 2. Project Setup
+## Quick Start 🚀
 
 ```bash
-# 1. Clone this template
-git clone <repository-url> your-project-name
-cd your-project-name
+# Get the template
+git clone https://github.com/yourusername/go-clean-template.git
 
-# 2. Initialize your new Git repository
-rm -rf .git
-git init
-git add .
-git commit -m "Initial commit from template"
+# Create your project
+mkdir -p your-project && cd your-project
+cp -r ../go-clean-template/* .
+rm -rf .git && git init
 
-# 3. Update module name in go.mod
-# Replace "web-server" with your module name
-sed -i '' 's/module web-server/module your-module-name/' go.mod
-
-# 4. Install dependencies
-make deps
+# Run the project
+make setup    # Install dependencies and setup database
+make dev      # Run with hot reload
 ```
 
-### 3. Database Configuration
+## Project Structure 📂
 
 ```bash
-# 1. Set up environment variables
-cp .env.example .env
-
-# 2. Update database credentials in .env if different from defaults:
-# DATABASE_URL="postgresql://postgres:postgres@localhost:5432/your_db_name?schema=public"
-
-# 3. Initialize database
-make db-init
-```
-
-### 4. Security Setup
-
-```bash
-# 1. Generate JWT secret
-openssl rand -base64 32 > jwt_secret.txt
-
-# 2. Generate encryption keys
-openssl rand -base64 32 > encryption_key.txt
-openssl rand -base64 12 > encryption_nonce.txt
-
-# 3. Update .env with these values
-# Copy contents from the generated files to respective .env variables
-```
-
-### 5. Development Workflow
-
-```bash
-# Start development server with hot reload
-make dev
-
-# Run tests
-make test
-
-# Format code
-make fmt
-
-# Run linter
-make lint
-```
-
-## Project Structure
-
-```plaintext
 .
 ├── internal/
-│   ├── domain/          # Business logic and interfaces
-│   │   ├── entity/      # Domain entities
-│   │   ├── repository/  # Repository interfaces
-│   │   └── constants/   # Domain constants
-│   ├── application/     # Use cases
-│   ├── infrastructure/  # External implementations
-│   │   ├── config/      # Configuration
-│   │   ├── middleware/  # HTTP middleware
-│   │   ├── repository/  # Repository implementations
-│   │   └── server/      # Server setup
-│   └── interface/       # Interface adapters
-│       └── handler/     # HTTP handlers
-├── prisma/             # Database schema and client
-└── scripts/            # Utility scripts
+│   ├── domain/                 # Enterprise business rules
+│   │   ├── entity/            # Enterprise entities
+│   │   ├── repository/        # Abstract repositories
+│   │   └── constants/         # Domain constants
+│   ├── application/           # Application business rules
+│   │   └── usecase/          # Use cases
+│   ├── infrastructure/        # Frameworks, drivers, tools
+│   │   ├── config/           # Configuration
+│   │   ├── middleware/       # HTTP middleware
+│   │   ├── repository/       # Repository implementations
+│   │   └── server/          # HTTP server
+│   └── interface/            # Interface adapters
+│       └── handler/          # HTTP handlers
+├── prisma/                   # Database schema and client
+└── scripts/                 # Utility scripts
 ```
 
-## API Endpoints
+## Layer Dependencies 🎯
+
+![Clean Architecture](https://blog.cleancoder.com/uncle-bob/images/2012-08-13-the-clean-architecture/CleanArchitecture.jpg)
+
+## Available Commands 🛠
+
+```bash
+# Development
+make setup           # Initialize project
+make dev             # Run with hot reload
+make test            # Run tests
+make lint            # Run linters
+
+# Database
+make db-init         # Initialize database
+make prisma-generate # Generate Prisma client
+make prisma-studio   # Open Prisma Studio
+
+# Docker
+make docker-build    # Build image
+make deploy          # Deploy with docker-compose
+```
+
+## API Documentation 📚
 
 ### Public Routes
 ```http
@@ -128,86 +90,64 @@ POST /api/public/users/register
 POST /api/public/users/login
 ```
 
-### Protected Routes (Requires JWT)
+### Protected Routes
 ```http
-GET    /api/private/users/:id
-PUT    /api/private/users/:id
-DELETE /api/private/users/:id
+GET    /api/private/users/:id     # Requires JWT
+PUT    /api/private/users/:id     # Requires JWT
+DELETE /api/private/users/:id     # Requires JWT
+GET    /api/private/users/admin/  # Requires Admin Role
 ```
 
-### Admin Routes (Requires Admin Role)
-```http
-GET /api/private/users/admin/
-```
+## Environment Variables 🔧
 
-## Available Make Commands
-
-### Development
-- `make dev` - Start server with hot reload
-- `make setup` - Initialize development environment
-- `make fmt` - Format code
-- `make lint` - Run linters
-
-### Database
-- `make db-init` - Initialize database
-- `make prisma-generate` - Generate Prisma client
-- `make prisma-db-push` - Push schema changes
-- `make prisma-studio` - Open Prisma Studio
-
-### Testing
-- `make test` - Run tests
-- `make test-coverage` - Run tests with coverage
-
-## Customization Guide
-
-1. Update Domain Entities
-   - Modify `/internal/domain/entity/` files
-   - Update Prisma schema in `prisma/schema.prisma`
-   - Run `make prisma-generate` after schema changes
-
-2. Add New Features
-   - Create new entities in `/internal/domain/entity/`
-   - Add repository interfaces in `/internal/domain/repository/`
-   - Implement use cases in `/internal/application/usecase/`
-   - Add handlers in `/internal/interface/handler/`
-
-3. Extend Middleware
-   - Add new middleware in `/internal/infrastructure/middleware/`
-   - Configure in `/internal/infrastructure/server/server.go`
-
-## Production Deployment
-
-1. Environment Setup
 ```bash
-# Set production values in .env
-ENV=production
+# Copy example environment file
+cp .env.example .env
+
+# Required variables
 PORT=8080
+DATABASE_URL=postgresql://user:pass@localhost:5432/dbname
+JWT_SECRET=your-secret-key
 ```
 
-2. Build for Production
+## Security 🔒
+
+- JWT-based authentication
+- Role-based access control
+- Password hashing with bcrypt
+- Request/Response encryption
+- Secure headers middleware
+
+## Tests ✅
+
 ```bash
-make build
+# Run all tests
+make test
+
+# Run with coverage
+make test-coverage
 ```
 
-3. Run Server
+## Docker 🐳
+
 ```bash
-./web-server
+# Start all services
+make deploy
+
+# View logs
+make docker-compose-logs
 ```
 
-## Contributing
+## Contributing 🤝
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
 
-## License
+## License 📝
 
-[MIT License](LICENSE)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+## Acknowledgments 🙏
 
+- [Clean Architecture by Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Gin Web Framework](https://gin-gonic.com/)
 - [Prisma](https://www.prisma.io/)
-- [JWT-Go](https://github.com/golang-jwt/jwt)

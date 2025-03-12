@@ -1,0 +1,46 @@
+# Version control
+.git
+.gitignore
+
+# Build artifacts
+bin/
+tmp/
+
+# Development and test files
+*_test.go
+tests/
+coverage.*
+.env
+.env.*
+!.env.example
+
+# Dependencies
+vendor/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Operating System
+.DS_Store
+*.log
+
+# Documentation
+*.md
+!README.md
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Prisma generated files
+prisma/db/
+prisma/*.db
+prisma/migrations/
+
+# Air hot reload
+.air.toml
+tmp/
