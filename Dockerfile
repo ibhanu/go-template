@@ -13,11 +13,14 @@ COPY go.mod go.sum ./
 # Download dependencies
 RUN go mod download
 
+# Install prisma-client-go
+RUN go install github.com/steebchen/prisma-client-go@latest
+
 # Copy source code
 COPY . .
 
-# Build the application
-RUN make build
+# Generate Prisma client and build
+RUN make prisma-generate && make build
 
 # Final stage
 FROM alpine:latest
