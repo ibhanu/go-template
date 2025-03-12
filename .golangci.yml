@@ -52,6 +52,10 @@ issues:
         - errcheck
         - dupl
 
+    - path: prisma/db/db_gen.go
+      linters:
+        - all
+
   # Maximum issues count per one linter
   max-issues-per-linter: 50
 

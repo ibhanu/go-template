@@ -10,7 +10,7 @@ import (
 	"web-server/internal/infrastructure/config"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
+	jwt "github.com/golang-jwt/jwt/v5" // Rename import to just "jwt" to match usage
 )
 
 type JWTClaims struct {
