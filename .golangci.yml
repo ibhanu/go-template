@@ -19,7 +19,6 @@ linters:
     - gosimple
     - staticcheck
     - stylecheck
-    - shadow
 
 linters-settings:
   gocyclo:

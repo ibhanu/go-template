@@ -60,10 +60,12 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/go_server_db
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v2
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.out
           flags: unittests
+          fail_ci_if_error: true
 
       - name: Lint code
         run: golangci-lint run ./...
