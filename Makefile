@@ -41,6 +41,26 @@ test-coverage:
 	go tool cover -html=coverage.out -o coverage.html
 	go test ./... -coverprofile=coverage.out -covermode=atomic -coverpkg=./... | go-junit-report > report.xml
 
+# Run tests with race detection
+test-race:
+	go test -race ./...
+
+# Run integration tests
+test-integration:
+	go test ./... -tags=integration
+
+# Run end-to-end tests
+test-e2e:
+	go test ./... -tags=e2e
+
+# Run stress tests
+test-stress:
+	go test ./... -tags=stress -v
+
+# Run benchmark tests
+benchmark:
+	go test -bench=. -benchmem ./...
+
 # Generate mocks (requires mockgen)
 mocks:
 	go generate ./...
@@ -57,6 +77,60 @@ lint:
 	else \
 		echo "golangci-lint is not installed"; \
 	fi
+
+# Run go vet separately
+vet:
+	go vet ./...
+
+# Check cyclomatic complexity
+cyclo:
+	@if command -v gocyclo >/dev/null 2>&1; then \
+		gocyclo -over 10 .; \
+	else \
+		echo "gocyclo is not installed. Run: go install github.com/fzipp/gocyclo/cmd/gocyclo@latest"; \
+	fi
+
+# Generate documentation
+docs:
+	@echo "Generating documentation..."
+	@if command -v godoc >/dev/null 2>&1; then \
+		echo "Visit http://localhost:6060/pkg/github.com/ibhanu/go-template" && \
+		godoc -http=:6060; \
+	else \
+		echo "godoc is not installed. Run: go install golang.org/x/tools/cmd/godoc@latest"; \
+	fi
+
+# Generate Swagger documentation
+swagger:
+	@echo "Generating Swagger documentation..."
+	@if command -v swag >/dev/null 2>&1; then \
+		swag init; \
+	else \
+		echo "swag is not installed. Run: go install github.com/swaggo/swag/cmd/swag@latest"; \
+	fi
+
+# Check database status
+db-status:
+	@echo "Checking database status..."
+	@./scripts/db-status.sh || echo "Database is not running"
+
+# Run database migrations
+db-migrate: prisma-generate
+	@echo "Running database migrations..."
+	@go run github.com/steebchen/prisma-client-go migrate deploy
+
+# Reset database
+reset-db:
+	@echo "Resetting database..."
+	@go run github.com/steebchen/prisma-client-go migrate reset --force
+	@$(MAKE) prisma-generate
+
+# Generate JWT keys
+generate-keys:
+	@echo "Generating JWT keys..."
+	@mkdir -p keys
+	@openssl genrsa -out keys/private.pem 2048
+	@openssl rsa -in keys/private.pem -outform PEM -pubout -out keys/public.pem
 
 # Prisma commands
 prisma-generate:
@@ -126,6 +200,11 @@ deploy: docker-build docker-compose-up
 	@echo "✓ Application deployed successfully"
 	@echo "Run 'make docker-compose-logs' to view logs"
 
-.PHONY: build run dev clean deps test test-coverage mocks fmt lint setup \
-	prisma-generate prisma-db-push prisma-studio db-init \
-	docker-build docker-run docker-compose-up docker-compose-down docker-compose-logs docker-clean deploy
+# Declare all phony targets
+.PHONY: build run dev clean deps \
+	test test-coverage test-race test-integration test-e2e test-stress benchmark \
+	mocks fmt lint vet cyclo docs swagger \
+	db-init db-status db-migrate reset-db \
+	prisma-generate prisma-db-push prisma-studio \
+	docker-build docker-run docker-compose-up docker-compose-down \
+	docker-compose-logs docker-clean setup deploy generate-keys
