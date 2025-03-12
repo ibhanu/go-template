@@ -5,79 +5,108 @@ run:
   skip-dirs:
     - prisma/db
 
-linters:
-  enable:
-    - gofmt
-    - govet
-    - revive
-    - gocyclo
-    - ineffassign
-    - misspell
-    - gocritic
-    - gosec
-    - unconvert
-    - unparam
-    - whitespace
-    - errcheck
-    - gosimple
-    - staticcheck
-    - stylecheck
-
 linters-settings:
-  gocyclo:
+  dupl:
+    threshold: 100
+  errorlint:
+    errorf: true
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  exhaustive:
+    check-generated: false
+    default-signifies-exhaustive: false
+  funlen:
+    lines: 65
+    statements: 40
+  gocognit:
     min-complexity: 15
-  revive:
-    min-confidence: 0.8
+  gocyclo:
+    min-complexity: 10
+  goconst:
+    min-len: 2
+    min-occurrences: 2
   gocritic:
     enabled-tags:
       - diagnostic
-      - style
+      - experimental
+      - opinionated
       - performance
-  gosec:
-    excludes:
-      - G404  # Use of weak random number generator
+      - style
+    disabled-checks:
+      - dupImport
+      - unnecessaryBlock
+  gofumpt:
+    extra-rules: true
+  misspell:
+    locale: US
+  nestif:
+    min-complexity: 4
+  nolintlint:
+    require-explanation: true
+    require-specific: true
+
+linters:
+  disable-all: true
+  enable:
+    - asciicheck
+    - bodyclose
+    - cyclop
+    - unused
+    - dogsled
+    - dupl
+    - durationcheck
+    - errcheck
+    - errorlint
+    - exhaustive
+    - forbidigo
+    - funlen
+    - gci
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - err113
+    - gofmt
+    - gofumpt
+    - goimports
+    - mnd
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - makezero
+    - misspell
+    - nakedret
+    - nestif
+    - nlreturn
+    - noctx
+    - nolintlint
+    - paralleltest
+    - predeclared
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - stylecheck
+    - tparallel
+    - thelper
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - wsl
+    - whitespace
+    - copyloopvar
 
 issues:
-  exclude-dirs:
-    - prisma/db
-    - tmp
   exclude-rules:
-    - path: _test\.go
-      linters:
-        - gocyclo
-        - errcheck
-        - dupl
-        - gosec
-
-    - path: mock_.*\.go
-      linters:
-        - revive
-        - errcheck
-        - dupl
-
-    - path: prisma/db/db_gen.go
-      text: ".*"
-      linters:
-        - all
-        - typecheck
-        - govet
-        - staticcheck
-        - stylecheck
-
-    # Alternatively, this more specific rule might help if the above doesn't work
-    - path: prisma/db/db_gen.go
-      text: "undefined|has no field or method"
+    - path: prisma
       linters:
         - typecheck
-
-  # Maximum issues count per one linter
-  max-issues-per-linter: 50
-
-  # Maximum count of issues with the same text
-  max-same-issues: 3
-
-output:
-  formats:
-    - colored-line-number
-  print-issued-lines: true
-  print-linter-name: true

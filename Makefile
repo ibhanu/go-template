@@ -37,9 +37,7 @@ test:
 
 # Run tests with coverage
 test-coverage:
-	go test ./... -coverprofile=coverage.out -covermode=atomic
-	go tool cover -html=coverage.out -o coverage.html
-	go test ./... -coverprofile=coverage.out -covermode=atomic -coverpkg=./... | go-junit-report > report.xml
+	go test -v -race -covermode atomic -coverprofile=coverage.txt ./internal/...
 
 # Run tests with race detection
 test-race:

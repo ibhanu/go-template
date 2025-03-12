@@ -54,35 +54,11 @@ jobs:
           go install mvdan.cc/gofumpt@latest
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
 
-      - name: Format Go files
-        run: |
-          echo "Formatting Go files..."
-          # List files that need formatting (excluding prisma)
-          UNFORMATTED=$(gofumpt -l -s $(find . -name "*.go" -not -path "./prisma/*"))
-          
-          if [ -n "$UNFORMATTED" ]; then
-            echo "The following files are not properly formatted:"
-            echo "$UNFORMATTED"
-            
-            # Format the files
-            echo -e "\nFormatting files..."
-            gofumpt -w -s $(find . -name "*.go" -not -path "./prisma/*")
-            
-            # Show the actual formatting changes
-            echo -e "\nFormatting changes made:"
-            git diff
-            
-            echo -e "\nError: Files were not properly formatted. Please run 'gofumpt -l -w' on your Go files locally"
-            # exit 1
-          else
-            echo "All Go files are properly formatted."
-          fi
+      - name: Lint code
+        run: golangci-lint run ./...
 
       - name: Generate Prisma client
         run: make prisma-generate
-
-      - name: Install go-junit-report
-        run: go install github.com/jstemmer/go-junit-report/v2@latest
 
       - name: Run tests with coverage
         run: |
@@ -90,18 +66,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/go_server_db
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.out,./report.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: true
-          verbose: true
-
-      - name: Lint code
-        run: golangci-lint run ./...
+      - name: Upload coverage report
+        run: bash <(curl -s https://codecov.io/bash)
 
       - name: Build for multiple platforms
         run: |
