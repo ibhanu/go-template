@@ -10,29 +10,88 @@ import (
 	"web-server/internal/infrastructure/config"
 
 	"github.com/gin-gonic/gin"
-	jwt "github.com/golang-jwt/jwt/v5" // Rename import to just "jwt" to match usage
+	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 type JWTClaims struct {
-	UserID string `json:"user_id"`
-	Role   string `json:"role"`
+	UserID    string `json:"user_id"`
+	Role      string `json:"role"`
+	TokenType string `json:"token_type"`
 	*jwt.RegisteredClaims
 }
 
-func GenerateToken(userID, role string) (string, error) {
+type TokenPair struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int64  `json:"expires_in"` // Access token expiration in seconds
+}
+
+func GenerateTokenPair(userID, role string) (*TokenPair, error) {
 	cfg := config.GetConfig()
 
-	claims := JWTClaims{
-		UserID: userID,
-		Role:   role,
+	// Generate access token
+	accessClaims := JWTClaims{
+		UserID:    userID,
+		Role:      role,
+		TokenType: "access",
 		RegisteredClaims: &jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(cfg.JWTExpiration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(cfg.JWTSecret)
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	accessTokenString, err := accessToken.SignedString(cfg.JWTSecret)
+	if err != nil {
+		return nil, err
+	}
+
+	// Generate refresh token
+	refreshClaims := JWTClaims{
+		UserID:    userID,
+		Role:      role,
+		TokenType: "refresh",
+		RegisteredClaims: &jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(cfg.JWTRefreshExpiration)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	refreshTokenString, err := refreshToken.SignedString(cfg.JWTRefreshSecret)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TokenPair{
+		AccessToken:  accessTokenString,
+		RefreshToken: refreshTokenString,
+		ExpiresIn:    int64(cfg.JWTExpiration.Seconds()),
+	}, nil
+}
+
+func RefreshToken(refreshTokenString string) (*TokenPair, error) {
+	cfg := config.GetConfig()
+	claims := &JWTClaims{}
+
+	// Parse and validate refresh token
+	token, err := jwt.ParseWithClaims(refreshTokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return cfg.JWTRefreshSecret, nil
+	})
+
+	if err != nil || !token.Valid {
+		return nil, errors.New("invalid refresh token")
+	}
+
+	if claims.TokenType != "refresh" {
+		return nil, errors.New("invalid token type")
+	}
+
+	// Generate new token pair
+	return GenerateTokenPair(claims.UserID, claims.Role)
 }
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -67,7 +126,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if !token.Valid {
+		if !token.Valid || claims.TokenType != "access" {
 			c.JSON(http.StatusUnauthorized, constants.ErrInvalidToken)
 			c.Abort()
 			return

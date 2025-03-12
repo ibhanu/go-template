@@ -9,10 +9,12 @@ import (
 )
 
 type Config struct {
-	JWTSecret       []byte
-	JWTExpiration   time.Duration
-	EncryptionKey   []byte
-	EncryptionNonce []byte
+	JWTSecret            []byte
+	JWTExpiration        time.Duration
+	JWTRefreshSecret     []byte
+	JWTRefreshExpiration time.Duration
+	EncryptionKey        []byte
+	EncryptionNonce      []byte
 }
 
 var instance *Config
@@ -49,19 +51,28 @@ func LoadConfig() (*Config, error) {
 			return nil, err
 		}
 
+		refreshSecret, err := generateRandomBytes(32)
+		if err != nil {
+			return nil, err
+		}
+
 		instance = &Config{
-			JWTSecret:       jwtSecret,
-			JWTExpiration:   24 * time.Hour,
-			EncryptionKey:   encKey,
-			EncryptionNonce: nonce,
+			JWTSecret:            jwtSecret,
+			JWTExpiration:        15 * time.Minute, // Access token expires in 15 minutes
+			JWTRefreshSecret:     refreshSecret,
+			JWTRefreshExpiration: 7 * 24 * time.Hour, // Refresh token expires in 7 days
+			EncryptionKey:        encKey,
+			EncryptionNonce:      nonce,
 		}
 	} else {
 		// If .env file exists, use values from it
 		instance = &Config{
-			JWTSecret:       []byte(os.Getenv("JWT_SECRET")),
-			JWTExpiration:   24 * time.Hour,
-			EncryptionKey:   []byte(os.Getenv("ENCRYPTION_KEY")),
-			EncryptionNonce: []byte(os.Getenv("ENCRYPTION_NONCE")),
+			JWTSecret:            []byte(os.Getenv("JWT_SECRET")),
+			JWTExpiration:        15 * time.Minute, // Access token expires in 15 minutes
+			JWTRefreshSecret:     []byte(os.Getenv("JWT_REFRESH_SECRET")),
+			JWTRefreshExpiration: 7 * 24 * time.Hour, // Refresh token expires in 7 days
+			EncryptionKey:        []byte(os.Getenv("ENCRYPTION_KEY")),
+			EncryptionNonce:      []byte(os.Getenv("ENCRYPTION_NONCE")),
 		}
 	}
 

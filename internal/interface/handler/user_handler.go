@@ -17,10 +17,17 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required" example:"password123"`
 }
 
+// RefreshRequest represents the refresh token request payload
+type RefreshRequest struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
 // LoginResponse represents the login response
 type LoginResponse struct {
-	Token string `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
-	User  struct {
+	AccessToken  string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	RefreshToken string `json:"refresh_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	ExpiresIn    int64  `json:"expires_in" example:"900"` // 15 minutes in seconds
+	User         struct {
 		ID       string `json:"id" example:"123e4567-e89b-12d3-a456-426614174000"`
 		Username string `json:"username" example:"johndoe"`
 		Email    string `json:"email" example:"user@example.com"`
@@ -110,12 +117,12 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 }
 
 // @Summary Login user
-// @Description Login with email and password to get JWT token
+// @Description Login with email and password to get JWT tokens
 // @Tags auth
 // @Accept json
 // @Produce json
 // @Param credentials body LoginRequest true "Login credentials"
-// @Success 200 {object} TokenResponse
+// @Success 200 {object} LoginResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 401 {object} ErrorResponse
 // @Router /public/users/login [post]
@@ -139,22 +146,50 @@ func (h *UserHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	// Generate JWT token
-	token, err := middleware.GenerateToken(user.ID, user.Role)
+	// Generate JWT tokens
+	tokens, err := middleware.GenerateTokenPair(user.ID, user.Role)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate tokens"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"token": token,
-		"user": gin.H{
-			"id":       user.ID,
-			"username": user.Username,
-			"email":    user.Email,
-			"role":     user.Role,
-		},
-	})
+	response := LoginResponse{
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+		ExpiresIn:    tokens.ExpiresIn,
+	}
+	response.User.ID = user.ID
+	response.User.Username = user.Username
+	response.User.Email = user.Email
+	response.User.Role = user.Role
+
+	c.JSON(http.StatusOK, response)
+}
+
+// @Summary Refresh access token
+// @Description Get new access token using refresh token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param refresh_token body RefreshRequest true "Refresh token"
+// @Success 200 {object} LoginResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 401 {object} ErrorResponse
+// @Router /public/users/refresh [post]
+func (h *UserHandler) RefreshToken(c *gin.Context) {
+	var req RefreshRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	tokens, err := middleware.RefreshToken(req.RefreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, tokens)
 }
 
 // @Summary Update a user

@@ -72,6 +72,9 @@ func NewServer() *Server {
 	// Apply global middleware
 	server.router.Use(middleware.EncryptionMiddleware())
 
+	// Apply rate limiter middleware - 100 requests per minute
+	server.router.Use(middleware.RateLimiterMiddleware(100, 1.67))
+
 	// Setup routes
 	api := server.router.Group("/api")
 	{
@@ -79,7 +82,8 @@ func NewServer() *Server {
 		public := api.Group("/public")
 		{
 			public.POST("/users/register", userHandler.CreateUser)
-			public.POST("/users/login", userHandler.LoginUser) // TODO: Implement login handler
+			public.POST("/users/login", userHandler.LoginUser)
+			public.POST("/users/refresh", userHandler.RefreshToken) // Add refresh token endpoint
 		}
 
 		// Private routes (require authentication)
