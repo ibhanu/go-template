@@ -54,38 +54,38 @@ func (r *InMemoryUserRepository) Update(user *entity.User) error {
 }
 
 func (r *InMemoryUserRepository) Delete(id string) error {
-r.mutex.Lock()
-defer r.mutex.Unlock()
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
 
-if _, exists := r.users[id]; !exists {
-return errors.New("user not found")
-}
+	if _, exists := r.users[id]; !exists {
+		return errors.New("user not found")
+	}
 
-delete(r.users, id)
-return nil
+	delete(r.users, id)
+	return nil
 }
 
 func (r *InMemoryUserRepository) List() ([]*entity.User, error) {
-r.mutex.RLock()
-defer r.mutex.RUnlock()
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
 
-users := make([]*entity.User, 0, len(r.users))
-for _, user := range r.users {
-users = append(users, user)
-}
+	users := make([]*entity.User, 0, len(r.users))
+	for _, user := range r.users {
+		users = append(users, user)
+	}
 
-return users, nil
+	return users, nil
 }
 
 func (r *InMemoryUserRepository) GetByEmail(email string) (*entity.User, error) {
-r.mutex.RLock()
-defer r.mutex.RUnlock()
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
 
-for _, user := range r.users {
-if user.Email == email {
-return user, nil
-}
-}
+	for _, user := range r.users {
+		if user.Email == email {
+			return user, nil
+		}
+	}
 
-return nil, errors.New("user not found")
+	return nil, errors.New("user not found")
 }

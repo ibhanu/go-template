@@ -28,13 +28,13 @@ func (uc *UserUseCase) UpdateUser(user *entity.User) error {
 }
 
 func (uc *UserUseCase) DeleteUser(id string) error {
-return uc.userRepo.Delete(id)
+	return uc.userRepo.Delete(id)
 }
 
 func (uc *UserUseCase) ListUsers() ([]*entity.User, error) {
-return uc.userRepo.List()
+	return uc.userRepo.List()
 }
 
 func (uc *UserUseCase) GetUserByEmail(email string) (*entity.User, error) {
-return uc.userRepo.GetByEmail(email)
+	return uc.userRepo.GetByEmail(email)
 }
