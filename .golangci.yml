@@ -1,6 +1,9 @@
 run:
   timeout: 5m
   tests: true
+  # Add skip-dirs to completely skip the directory from processing
+  skip-dirs:
+    - prisma/db
 
 linters:
   enable:
@@ -53,8 +56,19 @@ issues:
         - dupl
 
     - path: prisma/db/db_gen.go
+      text: ".*"
       linters:
         - all
+        - typecheck
+        - govet
+        - staticcheck
+        - stylecheck
+
+    # Alternatively, this more specific rule might help if the above doesn't work
+    - path: prisma/db/db_gen.go
+      text: "undefined|has no field or method"
+      linters:
+        - typecheck
 
   # Maximum issues count per one linter
   max-issues-per-linter: 50
