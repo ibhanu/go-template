@@ -1,4 +1,53 @@
+# Binaries and build artifacts
+/bin/*
+!/bin/.gitkeep
+/tmp
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+web-server
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.html
+
+# IDE specific files
+.idea
+.vscode
+*.swp
+*.swo
+
+# Environment files
 .env
-.vscode/launch.json
-tmp/main
-tmp/build-errors.log
+*.env
+!.env.example
+
+# Dependency directories
+vendor/
+
+# Prisma generated files
+/prisma/db
+/prisma/*.db
+/prisma/migrations
+
+# Air hot reload temporary files
+tmp/
+
+# macOS system files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Log files
+*.log
+logs/
+
+# Generated documentation
+/docs/generated/
