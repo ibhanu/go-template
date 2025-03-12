@@ -27,7 +27,7 @@ This template provides all these essentials out of the box, saving you weeks of 
 ## Features 🚀
 
 - [x] Clean Architecture with detailed examples
-- [x] JWT Authentication & Role-Based Access Control
+- [x] JWT Authentication & Role-Based Access Controlx
 - [x] End-to-End Encryption for requests/responses
 - [x] PostgreSQL with Prisma ORM
 - [x] Graceful Shutdown
@@ -37,7 +37,7 @@ This template provides all these essentials out of the box, saving you weeks of 
 - [x] Make commands for development
 - [x] Comprehensive test examples
 - [x] Swagger documentation
-- [ ] Rate Limiting (coming soon)
+- [x] Rate Limiting
 
 ## Quick Start 🚀
 
