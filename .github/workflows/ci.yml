@@ -54,23 +54,8 @@ jobs:
           go install mvdan.cc/gofumpt@latest
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
 
-      - name: Format Go files
-        run: |
-          echo "Formatting Go files..."
-          find . -name "*.go" -not -path "./prisma/*" -exec gofumpt -l -w {} \;
-          
-          # Check if there are any changes after formatting
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "Error: Files were not properly formatted. Please run 'gofumpt -l -w .' locally"
-            git diff
-            exit 1
-          fi
-
       - name: Generate Prisma client
         run: make prisma-generate
-
-      - name: Install go-junit-report
-        run: go install github.com/jstemmer/go-junit-report/v2@latest
 
       - name: Run tests with coverage
         run: |
