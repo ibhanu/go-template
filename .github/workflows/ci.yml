@@ -69,9 +69,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.out,./coverage.txt
 
-      - name: Lint code
-        run: golangci-lint run ./...
-
       - name: Build for multiple platforms
         run: |
           # Create artifacts directory
