@@ -37,7 +37,7 @@ test:
 
 # Run tests with coverage
 test-coverage:
-	go test -v -race -covermode atomic -coverprofile=coverage.txt ./internal/...
+	go test -v -race -covermode atomic -coverprofile=coverage.txt ./internal/application/...
 
 # Run tests with race detection
 test-race:

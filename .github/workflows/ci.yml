@@ -54,22 +54,42 @@ jobs:
           go install mvdan.cc/gofumpt@latest
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
 
-      - name: Lint code
-        run: golangci-lint run ./...
-        continue-on-error: true
-
+      - name: Format Go files
+        run: |
+          echo "Formatting Go files..."
+          find . -name "*.go" -not -path "./prisma/*" -exec gofumpt -l -w {} \;
+          
+          # Check if there are any changes after formatting
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Error: Files were not properly formatted. Please run 'gofumpt -l -w .' locally"
+            git diff
+            exit 1
+          fi
 
       - name: Generate Prisma client
         run: make prisma-generate
 
-      - name: Run tests with coverage
-        run: |
-          make test-coverage
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/go_server_db
+      - name: Install go-junit-report
+        run: go install github.com/jstemmer/go-junit-report/v2@latest
 
-      - name: Upload coverage report
-        run: bash <(curl -s https://codecov.io/bash)
+     - name: Run tests with coverage
+       run: |
+         make test-coverage
+       env:
+         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/go_server_db
+
+     - name: Upload coverage to Codecov
+       uses: codecov/codecov-action@v3
+       with:
+         token: ${{ secrets.CODECOV_TOKEN }}
+         files: ./coverage.out,./report.xml
+         flags: unittests
+         name: codecov-umbrella
+         fail_ci_if_error: true
+         verbose: true
+
+      - name: Lint code
+        run: golangci-lint run ./...
 
       - name: Build for multiple platforms
         run: |
