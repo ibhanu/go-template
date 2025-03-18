@@ -3,7 +3,7 @@ package main
 import (
 "log"
 "os"
-_ "web-server/docs" // swagger docs
+_ "web-server/docs"
 "web-server/internal/infrastructure/server"
 
 _ "github.com/swaggo/files"
