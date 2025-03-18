@@ -35,8 +35,11 @@ WORKDIR /app
 COPY --from=builder /app/web-server .
 COPY --from=builder /app/.env.example .env
 
+# Set default port
+ENV PORT=8080
+
 # Expose port
-EXPOSE 8080
+EXPOSE ${PORT}
 
 # Command to run
 CMD ["./web-server"]
